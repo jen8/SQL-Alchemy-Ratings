@@ -1,13 +1,14 @@
 """Utility file to seed ratings database from MovieLens data in seed_data/"""
 
 from sqlalchemy import func
-from model import User
+from model import User, Movie, Rating
+
 # from model import Rating
 # from model import Movie
 
 from model import connect_to_db, db
 from server import app
-from datetime import datetime
+import datetime
 
 
 def load_users():
@@ -24,8 +25,8 @@ def load_users():
         row = row.rstrip()
         user_id, age, gender, occupation, zipcode = row.split("|")
 
-        user = User(user_id=user_id,
-                    age=age,
+        user = User(user_id=int(user_id),
+                    age=int(age),
                     zipcode=zipcode)
 
         # We need to add to the session or it won't ever be stored
@@ -37,19 +38,29 @@ def load_users():
 
 def load_movies():
     """Load movies from u.item into database."""
+    print "Movies"
+    Movie.query.delete()
+
+
 
     for row in open("seed_data/u.item"):
         row = row.rstrip()
-        # row = row.split()
+        row = row.split("|")
         movie_id = row[0]
         title = row[1][:-7]
-        movie_id, title, released_str, imdb_url = row.split("|")
+        released_str = row[2]
+        imdb_url = row[4]
+        # movie_id, title, released_str, imdb_url = row.split("|")
 
+        # checks if movie has released date.if yes, it takes the
+            # released_at variable and turns into a datetime obj. 
         if released_str:
+        # if released_at:
             released_at = datetime.datetime.strptime(released_str, "%d-%b-%Y")
+        # if no released_str then return None for released_at variable.
         else:
             released_at = None 
-        movie = Movie(movie_id=movie_id,
+        movie = Movie(movie_id=int(movie_id),
                     title=title,
                     released_at=released_at,
                     imdb_url=imdb_url)
@@ -64,14 +75,17 @@ def load_movies():
 def load_ratings():
     """Load ratings from u.data into database."""
 
+    print "Ratings"
+    
+    Rating.query.delete()
+
     for row in open("seed_data/u.data"):
         row = row.rstrip()
-        rating_id, movie_id, user_id, score = row.split("|")
+        user_id, movie_id, score, timestamp = row.split()
 
-        rating = Ratings(rating_id=rating_id,
-                    movie_id=movie_id
-                    user_id=user_id
-                    score= score)
+        rating = Rating(movie_id=int(movie_id),
+                    user_id=int(user_id),
+                    score= int(score))
 
         # We need to add to the session or it won't ever be stored
         db.session.add(rating)
@@ -97,7 +111,7 @@ if __name__ == "__main__":
     connect_to_db(app)
 
     # In case tables haven't been created, create them
-    db.create_all()
+    # db.create_all()
 
     # Import different types of data
     load_users()

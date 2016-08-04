@@ -83,23 +83,30 @@ def show_form():
 
 
 @app.route("/login", methods=['POST'])
-    """Process form for existing users."""
 def process_form_existing_user():
-
+     """Process form for existing users."""
     email = request.form.get('email')
     password = request.form.get('password')
+    #adding user_id aka email to Flask session
+    
     
 
     #query for username in database
-    User.query.filter(User.email == 'email') 
+    current_user = User.query.filter(User.email == 'email') 
 
     #check if username matches passsword
-    if user_id[email] =  passsword:
-        flash('logged in!')
+    # if user_id[email] =  passsword:
+        # if session['email'] = user.email and session['password'] = user.password:
+        # if session['email'] = user.password
+        if current_user = True:
+        # flash('logged in!')
     return redirect('/')
-else:
+    # return render_template('/')
+        else:
     flash('Please try again, username/password not found!')
     return ("homepage.")
+
+   
 
 
     """ take user name from form and check if it exists in database """

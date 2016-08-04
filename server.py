@@ -25,10 +25,13 @@ app.secret_key = "ABC"
 # error.
 app.jinja_env.undefined = StrictUndefined
 
-
+import pdb
 @app.route('/')
-def index():
+def filter():
     """Homepage."""
+    # pdb.set_trace()
+
+    q = request.args.get('q')
 
     return render_template("homepage.html")
 
@@ -41,6 +44,73 @@ def user_list():
     return render_template("user_list.html", users=users)
 
 
+# added a route to that shows the login form from register_form.html
+@app.route('/register', methods=['GET'])
+def register_form():
+    """Show form for user signup."""
+
+    return render_template("register_form.html")    
+
+
+   
+# This route handles the submission of the login form.
+@app.route("/register", methods=['POST'])
+def process_form_new_user():
+
+    email = request.form.get('email')
+    password = request.form.get('password')
+    age = int(request.form.get('age'))
+    zipcode = int(request.form.get('zipcode'))
+
+    """ take user name from form and check if it exists in database """
+    
+    new_user = User(email=email, password=password, age=age, zipcode=zipcode)
+
+    # Adds the new_user info to database?
+    db.session.add(new_user)
+    db.session.commit()
+    
+    return redirect("/")
+
+
+@app.route('/login_form', methods=['GET'])
+def show_form():
+    """Show form for existing users."""
+
+    return render_template("log_in_form.html")
+
+
+
+
+@app.route("/login", methods=['POST'])
+    """Process form for existing users."""
+def process_form_existing_user():
+
+    email = request.form.get('email')
+    password = request.form.get('password')
+    
+
+    #query for username in database
+    User.query.filter(User.email == 'email') 
+
+    #check if username matches passsword
+    if user_id[email] =  passsword:
+        flash('logged in!')
+    return redirect('/')
+else:
+    flash('Please try again, username/password not found!')
+    return ("homepage.")
+
+
+    """ take user name from form and check if it exists in database """
+    
+    new_user = User(email=email, password=password, age=age, zipcode=zipcode)
+
+    # Adds the new_user info to database?
+    
+    db.session.commit()
+    
+    return redirect("/")
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the

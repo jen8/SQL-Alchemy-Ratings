@@ -10,7 +10,7 @@ from flask import (Flask, render_template, redirect, request, flash,
 
 
 
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 
 from model import connect_to_db, db, User, Rating, Movie, connect_to_db, db
 
@@ -69,7 +69,7 @@ def process_form_new_user():
     # Adds the new_user info to database?
     db.session.add(new_user)
     db.session.commit()
-    
+    flash("You've been added!")
     return redirect("/")
 
 
@@ -81,43 +81,46 @@ def show_form():
 
 
 
-
 @app.route("/login", methods=['POST'])
 def process_form_existing_user():
-     """Process form for existing users."""
+    """Process form for existing users."""
     email = request.form.get('email')
-    password = request.form.get('password')
-    #adding user_id aka email to Flask session
-    
-    
+    password = request.form.get('password')    
 
     #query for username in database
-    current_user = User.query.filter(User.email == 'email') 
-
-    #check if username matches passsword
-    # if user_id[email] =  passsword:
-        # if session['email'] = user.email and session['password'] = user.password:
-        # if session['email'] = user.password
-        if current_user = True:
-        # flash('logged in!')
-    return redirect('/')
-    # return render_template('/')
-        else:
-    flash('Please try again, username/password not found!')
-    return ("homepage.")
-
-   
-
-
-    """ take user name from form and check if it exists in database """
+    current_user = User.query.filter(User.email == email).first() 
+    print '***********************',current_user
+    # if current user found    
+    if current_user.password == password:
+        # add user_id to Flask session
+        # session['user']= current_user.user_id
+        session['user_id']= current_user.user_id
+        flash('logged in!')
+        return redirect('/')
     
-    new_user = User(email=email, password=password, age=age, zipcode=zipcode)
+    else:
+        flash('Please try again, username/password not found!')
+        redirect('/login_form')
 
-    # Adds the new_user info to database?
-    
     db.session.commit()
     
     return redirect("/")
+
+
+
+@app.route('/logout')
+def logout():
+   # remove the username from the session if it is there
+
+    del session["user_id"]
+    flash("Logged Out.")
+    return redirect("/")
+
+
+# @app.route('/user-details')
+# def user_detail():
+
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
@@ -127,6 +130,6 @@ if __name__ == "__main__":
     connect_to_db(app)
 
     # Use the DebugToolbar
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
 
     app.run()
